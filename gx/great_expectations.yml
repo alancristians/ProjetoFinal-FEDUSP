@@ -1,4 +1,3 @@
-
 # Welcome to Great Expectations! Always know what to expect from your data.
 #
 # Here you can define datasources, batch kwargs generators, integrations and
@@ -9,7 +8,7 @@
 
 # config_version refers to the syntactic version of this config file, and is used in maintaining backwards compatibility
 # It is auto-generated and usually does not need to be changed.
-config_version: 4
+config_version: 4.0
 
 # This config file supports variable substitution which enables: 1) keeping
 # secrets out of source control & 2) environment-based configuration changes
@@ -75,10 +74,24 @@ data_docs_sites:
   # profiles from the uncommitted directory. Read more at https://docs.greatexpectations.io/docs/terms/data_docs
   local_site:
     class_name: SiteBuilder
-    # set to false to hide how-to buttons in Data Docs
     show_how_to_buttons: true
     store_backend:
-        class_name: TupleFilesystemStoreBackend
-        base_directory: uncommitted/data_docs/local_site/
+      class_name: TupleFilesystemStoreBackend
+      base_directory: uncommitted/data_docs/local_site/
     site_index_builder:
-        class_name: DefaultSiteIndexBuilder
+      class_name: DefaultSiteIndexBuilder
+fluent_datasources:
+  sinan_pandas_datasource:
+    type: pandas
+    id: 083567b2-ad0f-4197-a0ee-33221a7b5f43
+    assets:
+      sinan_data_asset:
+        type: dataframe
+        id: ed15f261-43b8-4f6e-8f41-90a8e49e2a9e
+        batch_metadata: {}
+        batch_definitions:
+          sinan_batch_def:
+            id: c0b72112-bfac-4ec2-af67-5251db4d43c2
+            partitioner:
+analytics_enabled:
+data_context_id: b2c9325e-031a-43b4-b377-825063badbc1

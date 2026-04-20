@@ -38,109 +38,64 @@ class DataValidation:
                 raise
 
     def validate(self, df: pd.DataFrame) -> Dict[str, Any]:
-        """
-        Run validation on the provided dataframe using Great Expectations.
-
-        Args:
-            df: DataFrame to validate
-
-        Returns:
-            Dictionary containing validation results
-        """
         try:
             print(f"Starting GX validation with {len(df)} rows")
-            
             self._initialize_context()
 
+            # 1. Datasource
             datasource_name = "sinan_pandas_datasource"
             try:
                 datasource = self.context.data_sources.add_pandas(name=datasource_name)
-                print(f"✓ Created datasource: {datasource_name}")
-            except Exception as e:
-                print(f"Datasource might already exist: {e}")
+            except Exception:
                 datasource = self.context.data_sources.get(datasource_name)
 
-            # Create asset
+            # 2. Asset
             asset_name = "sinan_data_asset"
             try:
                 asset = datasource.add_dataframe_asset(name=asset_name)
-                print(f"✓ Created asset: {asset_name}")
-            except Exception as e:
-                print(f"Asset might already exist: {e}")
+            except Exception:
                 asset = datasource.get_asset(asset_name)
 
-            # Build batch definition
+            # 3. Batch Definition
             batch_definition_name = "sinan_batch_def"
             try:
                 batch_def = asset.add_batch_definition(name=batch_definition_name)
-                print(f"✓ Created batch definition: {batch_definition_name}")
-            except Exception as e:
-                print(f"Batch definition might already exist: {e}")
+            except Exception:
                 batch_def = asset.get_batch_definition(batch_definition_name)
 
-            # Create expectation suite
-            expectation_suite = gx.ExpectationSuite(name=self.suite_name)
+            # 4. Expectation Suite
             try:
-                expectation_suite = self.context.suites.add(expectation_suite)
+                expectation_suite = self.context.suites.add(gx.ExpectationSuite(name=self.suite_name))
             except Exception:
                 expectation_suite = self.context.suites.get(self.suite_name)
 
-            print(f"✓ Created expectation suite: {self.suite_name}")
-
-            expectation_1 = gx.expectations.ExpectColumnValuesToNotBeNull(
-                column="TP_NOT"
-            )
-            expectation_suite.add_expectation(expectation_1)
-            print("✓ Added expectation: TP_NOT values must not be null")
-
-            expectation_2 = gx.expectations.ExpectColumnValuesToBeBetween(
-                column="NU_IDADE_N",
-                min_value=0,
-                max_value=120
-            )
-            expectation_suite.add_expectation(expectation_2)
-            print("✓ Added expectation: NU_IDADE_N between 0 and 120")
-
-            expectation_3 = gx.expectations.ExpectColumnValuesToBeInSet(
-                column="CS_SEXO",
-                value_set=["F", "M", ""]
-            )
-            expectation_suite.add_expectation(expectation_3)
-            print("✓ Added expectation: CS_SEXO in ['F', 'M', '']")
-
+            # Adicionando as expectativas (limpando as antigas para não duplicar)
+            expectation_suite.expectations = []
+            
+            expectation_suite.add_expectation(gx.expectations.ExpectColumnValuesToNotBeNull(column="TP_NOT"))
+            expectation_suite.add_expectation(gx.expectations.ExpectColumnValuesToBeBetween(column="NU_IDADE_N", min_value=0, max_value=120))
+            expectation_suite.add_expectation(gx.expectations.ExpectColumnValuesToBeInSet(column="CS_SEXO", value_set=["F", "M", ""]))
+            
+            # 5. Validation Definition (O PONTO CRÍTICO)
+            # Usamos add_or_update para evitar o erro de 'Freshness'
             validation_def = gx.ValidationDefinition(
                 data=batch_def,
                 suite=expectation_suite,
                 name="sinan_validations"
             )
-            
-            try:
-                self.context.validation_definitions.add(validation_def)
-            except Exception:
-                pass
-            
-            print("✓ Created validation definition")
+            validation_def = self.context.validation_definitions.add_or_update(validation_def)
+            print("✓ Validation definition ready")
 
-            # Create checkpoint with actions
-            action_list = [
-                gx.checkpoint.UpdateDataDocsAction(name="update_data_docs")
-            ]
-            
+            # 6. Checkpoint
             checkpoint = gx.Checkpoint(
                 name=self.checkpoint_name,
                 validation_definitions=[validation_def],
-                actions=action_list,
                 result_format={"result_format": "COMPLETE"}
             )
-            
-            try:
-                self.context.checkpoints.add(checkpoint)
-            except Exception:
-                pass
-            print("✓ Created checkpoint")
+            checkpoint = self.context.checkpoints.add_or_update(checkpoint)
+            print("✓ Checkpoint ready")
 
-            # Run checkpoint
-            run_id = gx.RunIdentifier(run_name="sinan_validation_run")
+            # 7. Run
             results = checkpoint.run(batch_parameters={"dataframe": df})
 
             return {
@@ -151,13 +106,7 @@ class DataValidation:
 
         except Exception as e:
             print(f"Error during validation: {str(e)}")
-            import traceback
-            traceback.print_exc()
-            return {
-                "success": False,
-                "error": str(e),
-                "message": "Validation failed"
-            }
+            return {"success": False, "error": str(e), "message": "Validation failed"}
 
     def get_result(self) -> Optional[Dict[str, Any]]:
         """

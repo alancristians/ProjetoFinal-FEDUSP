@@ -33,18 +33,81 @@ services:
       DATABASE_URL: postgresql://postgres:postgres@db:5432/postgres
 
   grafana:
-      image: grafana/grafana:latest
-      container_name: grafana
-      depends_on:
-        - db
-      ports:
-        - "3001:3000"
-      environment:
-        GRAFANA_USER: admin
-        GRAFANA_PASSWORD: admin
-      volumes:
-        - grafana_data:/var/lib/grafana
-      
+    image: grafana/grafana:latest
+    container_name: grafana
+    depends_on:
+      - db
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana_data:/var/lib/grafana
+
+  airflow-webserver:
+    image: apache/airflow:2.7.1-python3.11
+    container_name: airflow_webserver
+    restart: always
+    depends_on:
+      - db
+    environment:
+      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://postgres:postgres@db:5432/postgres
+      - AIRFLOW__CORE__LOAD_EXAMPLES=False
+      - _AIRFLOW_DB_UPGRADE=true
+      - _AIRFLOW_WWW_USER_CREATE=true
+      - _AIRFLOW_WWW_USER_USERNAME=admin
+      - _AIRFLOW_WWW_USER_PASSWORD=admin
+      - AIRFLOW__WEBSERVER__SECRET_KEY=AlanPoliUSP2026
+      - PYTHONPATH=/opt/airflow:/opt/airflow/worker
+      - RAW_INPUT_PATH=/opt/airflow/worker
+      - RAW_OUTPUT_PATH=/opt/airflow/worker
+      - AIRFLOW__CORE__KEEPALIVE_DAEMON_TIMEOUT=2400
+      - AIRFLOW__CORE__PARALLELISM=1
+      - AIRFLOW__CORE__MAX_ACTIVE_TASKS_PER_DAG=1
+      - _PIP_ADDITIONAL_PYTHON_PACKAGES=pandas sqlalchemy great-expectations loguru
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./worker:/opt/airflow/worker
+      - ./data_quality:/opt/airflow/data_quality
+      - ./gx:/opt/airflow/gx
+    command: webserver
+
+  airflow-scheduler:
+    image: apache/airflow:2.7.1-python3.11
+    container_name: airflow_scheduler
+    restart: always
+    depends_on:
+      - db
+    environment:
+      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://postgres:postgres@db:5432/postgres
+      - AIRFLOW__CORE__LOAD_EXAMPLES=False
+      - _AIRFLOW_DB_UPGRADE=true
+      - _AIRFLOW_WWW_USER_CREATE=true
+      - _AIRFLOW_WWW_USER_USERNAME=admin
+      - _AIRFLOW_WWW_USER_PASSWORD=admin
+      - AIRFLOW__WEBSERVER__SECRET_KEY=AlanPoliUSP2026
+      - PYTHONPATH=/opt/airflow:/opt/airflow/worker
+      - RAW_INPUT_PATH=/opt/airflow/worker
+      - RAW_OUTPUT_PATH=/opt/airflow/worker
+      - AIRFLOW__CORE__KEEPALIVE_DAEMON_TIMEOUT=2400
+      - AIRFLOW__CORE__PARALLELISM=1
+      - AIRFLOW__CORE__MAX_ACTIVE_TASKS_PER_DAG=1
+      - _PIP_ADDITIONAL_PYTHON_PACKAGES=pandas sqlalchemy great-expectations loguru
+      # EVITA QUE A TAREFA SEJA MORTA POR FALTA DE HEARTBEAT (ZOMBIE)
+      - AIRFLOW__SCHEDULER__SCHEDULER_ZOMBIE_TASK_THRESHOLD=1200
+      - AIRFLOW__SCHEDULER__LOCAL_TASK_JOB_HEARTBEAT_SEC=30
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./worker:/opt/airflow/worker
+      - ./data_quality:/opt/airflow/data_quality
+      - ./gx:/opt/airflow/gx
+    command: scheduler
+
 volumes:
   postgres_data:
   grafana_data:
