@@ -46,7 +46,9 @@ services:
       - grafana_data:/var/lib/grafana
 
   airflow-webserver:
-    image: apache/airflow:2.7.1-python3.11
+    build:
+      context: .
+      dockerfile: Dockerfile.airflow
     container_name: airflow_webserver
     restart: always
     depends_on:
@@ -63,10 +65,8 @@ services:
       - PYTHONPATH=/opt/airflow:/opt/airflow/worker
       - RAW_INPUT_PATH=/opt/airflow/worker
       - RAW_OUTPUT_PATH=/opt/airflow/worker
-      - AIRFLOW__CORE__KEEPALIVE_DAEMON_TIMEOUT=2400
       - AIRFLOW__CORE__PARALLELISM=1
       - AIRFLOW__CORE__MAX_ACTIVE_TASKS_PER_DAG=1
-      - _PIP_ADDITIONAL_PYTHON_PACKAGES=pandas sqlalchemy great-expectations loguru
     ports:
       - "8080:8080"
     volumes:
@@ -77,7 +77,9 @@ services:
     command: webserver
 
   airflow-scheduler:
-    image: apache/airflow:2.7.1-python3.11
+    build:
+      context: .
+      dockerfile: Dockerfile.airflow
     container_name: airflow_scheduler
     restart: always
     depends_on:
@@ -94,13 +96,7 @@ services:
       - PYTHONPATH=/opt/airflow:/opt/airflow/worker
       - RAW_INPUT_PATH=/opt/airflow/worker
       - RAW_OUTPUT_PATH=/opt/airflow/worker
-      - AIRFLOW__CORE__KEEPALIVE_DAEMON_TIMEOUT=2400
-      - AIRFLOW__CORE__PARALLELISM=1
-      - AIRFLOW__CORE__MAX_ACTIVE_TASKS_PER_DAG=1
-      - _PIP_ADDITIONAL_PYTHON_PACKAGES=pandas sqlalchemy great-expectations loguru
-      # EVITA QUE A TAREFA SEJA MORTA POR FALTA DE HEARTBEAT (ZOMBIE)
       - AIRFLOW__SCHEDULER__SCHEDULER_ZOMBIE_TASK_THRESHOLD=1200
-      - AIRFLOW__SCHEDULER__LOCAL_TASK_JOB_HEARTBEAT_SEC=30
     volumes:
       - ./dags:/opt/airflow/dags
       - ./worker:/opt/airflow/worker

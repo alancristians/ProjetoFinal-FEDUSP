@@ -1,7 +1,7 @@
 {
   "expectations": [
     {
-      "id": "7f893648-1c58-49d8-8d3c-aef99ea54f10",
+      "id": "77a96a22-0722-4df7-8f7a-b17511264f9c",
       "kwargs": {
         "column": "TP_NOT"
       },
@@ -10,7 +10,7 @@
       "type": "expect_column_values_to_not_be_null"
     },
     {
-      "id": "f29e0340-9880-4278-b3e5-fa6f8a20b331",
+      "id": "d0fc9cdd-90aa-4806-a944-85d5777582e9",
       "kwargs": {
         "column": "NU_IDADE_N",
         "max_value": 120.0,
@@ -21,7 +21,7 @@
       "type": "expect_column_values_to_be_between"
     },
     {
-      "id": "b0c52013-5757-4965-9c75-1c6539d5387b",
+      "id": "36495631-4d02-4516-bcfe-0b736fa7a40f",
       "kwargs": {
         "column": "CS_SEXO",
         "value_set": [

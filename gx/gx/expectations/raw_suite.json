@@ -1,0 +1,44 @@
+{
+  "expectations": [
+    {
+      "id": "9425bc50-9159-43c8-b0ae-38f344306dde",
+      "kwargs": {
+        "column": "CS_SEXO",
+        "value_set": [
+          "F",
+          "M",
+          "I"
+        ]
+      },
+      "meta": {},
+      "severity": "critical",
+      "type": "expect_column_values_to_be_in_set"
+    },
+    {
+      "id": "54395ca2-63d7-46dc-a564-3f363e4b6972",
+      "kwargs": {
+        "column": "NU_IDADE_N",
+        "max_value": 5000.0,
+        "min_value": 0.0
+      },
+      "meta": {},
+      "severity": "critical",
+      "type": "expect_column_values_to_be_between"
+    },
+    {
+      "id": "bd899eef-bf8f-4fdb-af3e-c47667e0d466",
+      "kwargs": {
+        "column": "TP_NOT"
+      },
+      "meta": {},
+      "severity": "critical",
+      "type": "expect_column_values_to_not_be_null"
+    }
+  ],
+  "id": "35f13714-3b83-43e1-831b-237749a43797",
+  "meta": {
+    "great_expectations_version": "1.17.0"
+  },
+  "name": "raw_suite",
+  "notes": null
+}

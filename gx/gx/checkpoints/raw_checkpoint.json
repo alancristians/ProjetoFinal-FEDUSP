@@ -1,0 +1,12 @@
+{
+  "actions": [],
+  "id": "f682a02a-dfcc-4c05-874f-cc160e7215ac",
+  "name": "raw_checkpoint",
+  "result_format": "SUMMARY",
+  "validation_definitions": [
+    {
+      "id": "74368e51-ad23-4b3c-9e04-354c8247b1d0",
+      "name": "sinan_validation_def"
+    }
+  ]
+}

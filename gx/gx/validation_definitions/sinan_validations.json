@@ -1,0 +1,22 @@
+{
+  "data": {
+    "asset": {
+      "id": "f6fb2e5f-1017-4c6f-a568-f9fa6f139b4c",
+      "name": "sinan_data_asset"
+    },
+    "batch_definition": {
+      "id": "ef148bbc-84d3-401d-b870-8b9c9a5c2d8e",
+      "name": "sinan_batch_def"
+    },
+    "datasource": {
+      "id": "8f2c3a2b-d7f9-4201-bf67-17388dc79562",
+      "name": "sinan_pandas_datasource"
+    }
+  },
+  "id": "8f0783af-ae89-4dd6-9f31-af5ceb9d7209",
+  "name": "sinan_validations",
+  "suite": {
+    "id": "35f13714-3b83-43e1-831b-237749a43797",
+    "name": "raw_suite"
+  }
+}

@@ -1,0 +1,22 @@
+FROM apache/airflow:2.7.1-python3.11
+
+# Muda para root para instalar dependências de sistema
+USER root
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    libpq-dev \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Volta para o usuário airflow para instalar pacotes Python
+USER airflow
+
+# Instala as libs com versões compatíveis para evitar o erro do NumPy 2.0
+RUN pip install --no-cache-dir \
+    "numpy<2.0.0" \
+    "pandas<2.2.0" \
+    "sqlalchemy<2.0.0" \
+    "great-expectations==1.17.0" \
+    "loguru" \
+    "psycopg2-binary"
